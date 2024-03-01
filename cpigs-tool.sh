@@ -38,11 +38,13 @@ MODULES_DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 # todo: source all
-source "$MODULES_DIR/modules/moonlight.sh"
+for module in modules/*.sh; do
+    source $module
+done
 
 function bootstrap()
 {
-    sudo apt install -y librsvg2-bin
+    sudo apt install -y librsvg2-bin jq
 }
 
 function help()
