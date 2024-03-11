@@ -3,7 +3,8 @@
 SELF=$0
 MODULES=()
 
-CPIGS_WORKSPACE=../cpigs-tool-workspace
+CPIGS_DIR=`dirname "$0"`
+CPIGS_WORKSPACE=$CPIGS_DIR/../cpigs-tool-workspace
 mkdir -p $CPIGS_WORKSPACE
 
 function cpigs_register()
@@ -27,18 +28,33 @@ function cpigs_ask()
 
 function cpigs_link()
 {
+    if ! [[ $PWD/ = /home/cpi/apps/Menu/* ]]; then
+        echo "Please run inside /home/cpi/apps/Menu"
+        exit -1
+    fi
+
     local pos=$1
     local title=$2
     local script=$3
     local icon=$4
-    echo "linking $title on pos $pos with script $script and icon $icon"
+#    echo "linking $title on pos $pos with script $script and icon $icon"
+
+    local scriptFile="${PWD}/$1_$2.sh"
+    local subPath="${PWD#/home/cpi/apps/Menu}"
+    local iconFile="/home/cpi/launchergo/skin/default/Menu/GameShell${subPath}/$2.png"
+
+#    echo $scriptFile
+#    echo $subPath
+#    echo $iconFile
+
+    cp "${script}" "${scriptFile}"
+    cp "${icon}" "${iconFile}"
+    chmod +x "${scriptFile}"
+
+    echo "Restart LauncherGo to see change"
 }
 
-MODULES_DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-# todo: source all
-for module in modules/*.sh; do
+for module in $CPIGS_DIR/modules/*.sh; do
     source $module
 done
 
@@ -51,6 +67,7 @@ function help()
 {
     echo "usage: $0 [options] module ..."
     echo "options:"
+    echo "--bootstrap: install dependencies"
     echo "--help: this text"
     echo "--list: list all known modules"
 }
@@ -82,6 +99,10 @@ while [ "$#" -gt 0 ]; do
         ;;
       --list)
         list
+        exit 0
+        ;;
+      --bootstrap)
+        bootstrap
         exit 0
         ;;
       *)

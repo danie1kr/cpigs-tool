@@ -31,7 +31,7 @@ function retroarch_install()
 function retroarch_update()
 {
     if ! [ -f $CPIGS_WORKSPACE_RETROARCH/installed ]; then
-        cpigs_error "Please install first"
+        cpigs_error "Please run install command first"
         return -1
     fi
 
@@ -49,29 +49,67 @@ function retroarch_update()
 function retroarch_link()
 {
     if ! [ -f $CPIGS_WORKSPACE_RETROARCH/installed ]; then
-        cpigs_error "Please install first"
+        cpigs_error "Please run install command first"
         return -1
     fi
 
+    printf "\nSelect a RetroArch playlist: \n"
+    local idx=0
+    local playlists=()
+    for pl in $CPIGS_RETROARCH_CONFIG/playlists/*.lpl; do
+        printf "[%2d] %s\n" "$idx" "$pl"
+        playlists[$idx]=$pl
+        ((idx++))
+    done
+    if [ $idx == 0 ]; then printf "no playlists found\n"; return 0; fi
+
+    local playlistIdx=`cpigs_ask "Playlist id"`
+    if ! [ "${playlists[$playlistIdx]+abc}" ]; then printf "invalid index\n"; return 0; fi
+    local playlistName="${playlists[$playlistIdx]}"
+
+    printf "\nSelect a game from ${playlistName}:\n(other games might not be fully configured with a core. Run them from retroArch just once.)\n"
+    local games=()
+    mapfile -t games < <(jq '.items[] | select(.core_path != "DETECT") | .label' "${playlists[$playlistIdx]}")
+    idx=0
+    for game in "${games[@]}"; do
+        printf "[%2d] %s\n" "$idx" "`echo ${game} | sed 's/\"//g'`"
+        ((idx++))
+    done
+    if [ $idx == 0 ]; then printf "no games found in playlist ${playlistName}\n"; return 0; fi
+
+    local gameIdx=`cpigs_ask "Game id"`
+    if ! [ "${games[$gameIdx]+abc}" ]; then printf "invalid index\n"; return 0; fi
+    local name="${games[$gameIdx]}"
+    local rom=`jq ".items[] | select(.label == ${name}) | .path" "${playlists[$playlistIdx]}"`
+    local core=`jq ".items[] | select(.label == ${name}) | .core_path" "${playlists[$playlistIdx]}"`
+
+    printf "\nConfigure Launcher Item for ${name}:\n"
     local pos=`cpigs_ask "Launcher Item Position" "20"`
     local title=`cpigs_ask "Launcher Item Title" "retroarch"`
 
-    local idx=0
-    local playlists=()
-    for pl in "$CPIGS_RETROARCH_CONFIG/*.lpl"; do
-        echo "[${idx}] $pl"
-        playlists[$idx]=$CPIGS_RETROARCH_CONFIG/$pl
-        ((idx++))
-    done
-
-    local playlistIdx=`cpigs_ask "Playlist id"`
-
-
-
-
+    name=`echo ${name} | sed "s/\"//g"`
+#    echo $name
+#    echo $rom
+#    echo $core
     local script="/tmp/cpigs/script"
-    local icon="$CPIGS_WORKSPACE_RETROARCH/retroarch.png"
-    cpigs_link $pos $title $script $icon
+    mkdir -p /tmp/cpigs
+    touch $script
+
+    echo "`realpath ${CPIGS_WORKSPACE_RETROARCH}/RetroArch/retroarch` -L ${core} ${rom}" > $script
+
+#    cat $script
+
+    local systemBasename=`basename "${playlists[$playlistIdx]}"`
+    local icon="${CPIGS_RETROARCH_CONFIG}/thumbnails/${systemBasename%.*}/Named_Boxarts/${name}.png"
+    icon=`echo $icon | sed "s/\&/_/g"`
+    if ! [ -f "${icon}" ]; then
+        icon="$CPIGS_WORKSPACE_RETROARCH/retroarch.png"
+    fi 
+
+    script=`realpath "${script}"`
+    icon=`realpath "${icon}"`
+
+    cpigs_link "$pos" "$title" "$script" "$icon"
 }
 
 function retroarch()
