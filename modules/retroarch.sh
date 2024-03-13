@@ -92,8 +92,6 @@ function retroarch_link()
 #    echo $rom
 #    echo $core
     local script="/tmp/cpigs/script"
-    mkdir -p /tmp/cpigs
-    touch $script
 
     echo "`realpath ${CPIGS_WORKSPACE_RETROARCH}/RetroArch/retroarch` -L ${core} ${rom}" > $script
 

@@ -91,6 +91,17 @@ function call()
     $module "$@"
 }
 
+# banner
+echo \
+" __ __   __  __    ___         
+/  |__)|/ _ (_  __  | _  _ | _ 
+\__|   |\\__)__)     |(_)(_)|_) v$(git -C ${CPIGS_DIR} rev-parse --short HEAD) $(git -C ${CPIGS_DIR} log -1 --format=\"%at\" | xargs -I{} date -d @{} +%Y/%m/%d-%H:%M:%S)
+https://github.com/danie1kr/cpigs-tool
+"
+
+# setup
+mkdir -p /tmp/cpigs
+
 while [ "$#" -gt 0 ]; do
     case "$1" in
       --help)
