@@ -23,6 +23,8 @@ function devilutionX_install()
 
     touch installed
 
+    echo "Installation finished. Please ensure /home/cpi/.local/share/diasurgical/devilution/DIABDAT.MPQ to be present."
+
     popd
 }
 
@@ -51,13 +53,18 @@ function devilutionX_link()
         return -1
     fi
 
+    if ! [ -f /home/cpi/.local/share/diasurgical/devilution/DIABDAT.MPQ ]; then
+        cpigs_error "DIABDAT.MPQ not found in /home/cpi/.local/share/diasurgical/devilution. Please install first."
+        return -1
+    fi
+
     local pos=`cpigs_ask "Launcher Item Position" "20"`
     local title=`cpigs_ask "Launcher Item Title" "devilutionX"`
 
     local script="/tmp/cpigs/script"
     local icon="$CPIGS_WORKSPACE_DEVILUTIONX/devilutionX.png"
     
-    echo "$CPIGS_WORKSPACE_DEVILUTIONX/devilutionX/build/devilutionx" > $script
+    echo "`realpath $CPIGS_WORKSPACE_DEVILUTIONX/devilutionX/build/devilutionx`" > $script
 
     cpigs_link $pos $title $script $icon
 }
