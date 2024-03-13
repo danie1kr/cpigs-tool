@@ -101,6 +101,10 @@ function retroarch_link()
     local icon="${CPIGS_RETROARCH_CONFIG}/thumbnails/${systemBasename%.*}/Named_Boxarts/${name}.png"
     icon=`echo $icon | sed "s/\&/_/g"`
     if ! [ -f "${icon}" ]; then
+        icon="${CPIGS_RETROARCH_CONFIG}/thumbnails/${systemBasename%.*}/Named_Titles/${name}.png"
+        icon=`echo $icon | sed "s/\&/_/g"`
+    fi
+    if ! [ -f "${icon}" ]; then
         icon="$CPIGS_WORKSPACE_RETROARCH/retroarch.png"
     fi 
 
