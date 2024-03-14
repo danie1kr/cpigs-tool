@@ -4,6 +4,7 @@ SELF=$0
 MODULES=()
 
 CPIGS_DIR=`dirname "$0"`
+CPIGS_DIR=`realpath ${CPIGS_DIR}`
 CPIGS_WORKSPACE=$CPIGS_DIR/../cpigs-tool-workspace
 mkdir -p $CPIGS_WORKSPACE
 
@@ -28,11 +29,6 @@ function cpigs_ask()
 
 function cpigs_link()
 {
-    if ! [[ $PWD/ = /home/cpi/apps/Menu/* ]]; then
-        echo "Please run inside /home/cpi/apps/Menu"
-        exit -1
-    fi
-
     local pos=$1
     local title=$2
     local script=$3
@@ -61,6 +57,10 @@ done
 function bootstrap()
 {
     sudo apt install -y librsvg2-bin jq
+    if ! [[ ":$PATH:" == *":$CPIGS_DIR:"* ]]; then
+        echo "Adding ${CPIGS_DIR} to PATH in /home/cpi/.profile"
+        echo "PATH=${CPIGS_DIR}:\$PATH" >> /home/cpi/.profile
+    fi 
 }
 
 function help()
@@ -102,11 +102,12 @@ https://github.com/danie1kr/cpigs-tool
 # setup
 mkdir -p /tmp/cpigs
 
+# run arguments
 while [ "$#" -gt 0 ]; do
     case "$1" in
       --help)
-         help
-         exit 0
+        help
+        exit 0
         ;;
       --list)
         list
@@ -117,6 +118,11 @@ while [ "$#" -gt 0 ]; do
         exit 0
         ;;
       *)
+        # check if we run in the correct directory
+        if ! [[ $PWD/ = /home/cpi/apps/Menu/* ]]; then
+            echo "Please run inside /home/cpi/apps/Menu"
+            exit -1
+        fi
         module=$1
         shift 1
         call $module "$@" 

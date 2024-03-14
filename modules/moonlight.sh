@@ -38,10 +38,29 @@ function moonlight_link()
         return -1
     fi
 
+    local host=`cpigs_ask "Moonlight Host" ""`
+
+    printf "\nSelect an application on ${host}:\n"
+    local apps=()
+    mapfile -t apps < <(DISPLAY=:0 moonlight-qt list ${host})
+    local idx=0
+    for app in "${apps[@]}"; do
+        printf "[%2d] %s\n" "$idx" "$app"
+        ((idx++))
+    done
+    if [ $idx == 0 ]; then printf "no apps found on host ${host}\n"; return 0; fi
+
+    local appIdx=`cpigs_ask "Application id"`
+    if ! [ "${apps[$appIdx]+abc}" ]; then printf "invalid index\n"; return 0; fi
+    local app="${apps[$appIdx]}"
+    local options=`cpigs_ask "Additional options" "--resolution 320x240 --bitrate 800"`
+
+    printf "\nConfigure Launcher Item for ${app} on ${host}:\n"
     local pos=`cpigs_ask "Launcher Item Position" "20"`
     local title=`cpigs_ask "Launcher Item Title" "moonlight"`
 
     local script="/tmp/cpigs/script"
+    echo "moonlight-qt stream \"${host}\" \"${app}\" ${options}" > $script
     local icon="$CPIGS_WORKSPACE_MOONLIGHT/moonlight.png"
     cpigs_link $pos $title $script $icon
 }
