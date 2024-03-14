@@ -12,10 +12,19 @@ At the moment, the tool supports:
 	 - Downloading, compiling+installing and running the game.
  - [RetroArch](https://github.com/libretro/RetroArch), a Cross-platform, sophisticated frontend for the libretro API
 	 - Downloading, compiling+installing and linking any properly configured playlist game.
+	 - Games have to be in a playlist and with associated with a core to show up.
  - [moonlight-qt](https://github.com/moonlight-stream/moonlight-qt), a GameStream client for PCs
 	 - Downloading, installing and linking a remote application.
 
 The CPIGS-Tool requires a [modern armbian](https://github.com/uberlinuxguy/armbian-build) to run.
+# Installation
+
+ 1. Log into the GameShell via SSH and run in the home directory:
+ 2. `git clone https://github.com/danie1kr/cpigs-tool`
+ 3. `cd cpigs-tool`
+ 4. `./cpigs-tool --bootstrap`
+ 5. logout and log back in, so the `cpigs-tool.sh` is known in your `PATH` variable.
+ 6. Go to `/home/cpi/apps/Menu` and run `cpigs-tool --list` to see the available modules.
 
 # Contribution
 Just submit an issue or pull request with ideas! Any input is welcome.
