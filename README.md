@@ -1,3 +1,5 @@
+This repository is no archived as I do no longer have access to a ClockworkPI GameShell.
+Feel free to fork and continue!
 
 # cpigs-tool
 Configure your ClockworkPI GameShell
